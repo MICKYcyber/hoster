@@ -1,30 +1,46 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const path = require('path');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
-
-// Serve static files (e.g., your HTML, CSS, JS)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Handle WebSocket connections
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  socket.on('newMessage', (msg) => {
-    console.log('New message:', msg);
-    io.emit('allMessages', [msg]); // Broadcast to all clients
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
+const io = new Server(server, {
+    cors: { origin: "*" } // allow cross-origin (front-end can be anywhere)
 });
 
-// Start the server
-server.listen(3000, () => {
-  console.log('Server running at http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+
+// Store messages per chat room
+const messagesByRoom = { chat1: [], chat2: [], chat3: [], chat4: [], chat5: [] };
+
+io.on("connection", (socket) => {
+
+    // Join a chat room
+    socket.on("joinRoom", (room) => {
+        socket.join(room);
+        // Send existing messages in that room
+        if(messagesByRoom[room]) {
+            socket.emit("allMessages", messagesByRoom[room]);
+        }
+    });
+
+    // New message from a client
+    socket.on("newMessage", ({ name, room }) => {
+        if(!messagesByRoom[room]) messagesByRoom[room] = [];
+        const msg = { name, room };
+        messagesByRoom[room].push(msg);
+
+        // Broadcast the updated messages to all clients in the same room
+        io.to(room).emit("allMessages", messagesByRoom[room]);
+    });
+
+    // Disconnect handler (optional)
+    socket.on("disconnect", () => {
+        // Can handle cleanup if needed
+    });
 });
+
+// Serve static files if needed
+// app.use(express.static("public")); // optional, if you host index.html locally
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
