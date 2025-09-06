@@ -1,24 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Minecraft Hosting</title>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            // Open a new tab with the current page content
-            const newWindow = window.open('about:blank', '_blank');
-            
-            if (newWindow) {
-                // Write the current page's HTML into the new tab
-                newWindow.document.write(document.documentElement.outerHTML);
-                newWindow.document.close();
-                
-                // Close the original tab
-                window.close();
-            }
-        });
-    </script>
-
+<meta charset="UTF-8">
+<title>Minecraft Hosting</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
     body {
