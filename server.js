@@ -18,7 +18,7 @@ io.on("connection", (socket) => {
     // Join a chat room
     socket.on("joinRoom", (room) => {
         socket.join(room);
-        // Send all previous messages in this room to this client only
+        // Send all previous messages to this client only
         if(messagesByRoom[room]) {
             socket.emit("allMessages", messagesByRoom[room]);
         }
